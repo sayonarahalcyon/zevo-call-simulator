@@ -11,9 +11,9 @@ PERSONAS = {
         "desc": "Overdue on payment, confused about whether he's in a grace period, and how much he owes.",
     },
     "derekt": {
-        "name": "Derek T.",
+        "name": "Jason T.",
         "assistant_id": "b4638d74-4400-4f21-81a4-97a5f3470d2b",
-        "label": "Derek T. — Payment extension / collections",
+        "label": "Jason T. — Payment extension / collections",
         "desc": "Behind on payment, wants a partial-payment extension so he isn't locked out.",
     },
     "marcust": {
