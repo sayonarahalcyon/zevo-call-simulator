@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vapi SDK Test â No Widget</title>
+<style>
+  body { font-family: -apple-system, sans-serif; background:#f5f6f8; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+  .card { background:#fff; border-radius:16px; padding:32px; max-width:480px; width:100%; box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.04); }
+  button { font-size:16px; padding:12px 20px; border-radius:10px; border:none; background:#2563eb; color:#fff; cursor:pointer; width:100%; }
+  button:disabled { opacity:.5; cursor:default; }
+  #status { margin-top:16px; font-size:14px; color:#374151; white-space:pre-wrap; }
+  #log { margin-top:12px; font-size:12px; color:#6b7280; max-height:200px; overflow-y:auto; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Vapi Core SDK Test (Priya)</h1>
+  <p>This page uses <code>@vapi-ai/web</code> directly â no &lt;vapi-widget&gt; embed component.</p>
+  <button id="startBtn">Start Call</button>
+  <div id="status">Idle</div>
+  <div id="log"></div>
+</div>
+
+<script type="module">
+  import Vapi from "https://esm.sh/@vapi-ai/web@2.1.5";
+
+  const PUBLIC_KEY = "f9fb49f0-856f-4107-b05d-2291113ca60c";
+  const ASSISTANT_ID = "90b74b45-a781-4674-bfe9-36392551428a"; // Priya
+
+  const statusEl = document.getElementById("status");
+  const logEl = document.getElementById("log");
+  const btn = document.getElementById("startBtn");
+
+  function log(msg) {
+    const t = new Date().toLocaleTimeString();
+    logEl.textContent += `[${t}] ${msg}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  const vapi = new Vapi(PUBLIC_KEY);
+
+  vapi.on("call-start", () => { statusEl.textContent = "Call started"; log("call-start"); });
+  vapi.on("call-end", () => { statusEl.textContent = "Call ended"; log("call-end"); btn.disabled = false; });
+  vapi.on("speech-start", () => log("speech-start (assistant speaking)"));
+  vapi.on("speech-end", () => log("speech-end"));
+  vapi.on("volume-level", (v) => { /* noisy, skip logging every tick */ });
+  vapi.on("message", (m) => {
+    if (m.type === "transcript") {
+      log(`transcript [${m.role}] (${m.transcriptType}): ${m.transcript}`);
+    } else {
+      log(`message: ${m.type}`);
+    }
+  });
+  vapi.on("error", (e) => { log(`ERROR: ${JSON.stringify(e)}`); statusEl.textContent = "Error â see log"; });
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    statusEl.textContent = "Requesting mic + starting call...";
+    log("Start button clicked");
+    try {
+      await vapi.start(ASSISTANT_ID);
+    } catch (err) {
+      log(`start() threw: ${err}`);
+      statusEl.textContent = "Failed to start â see log";
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
